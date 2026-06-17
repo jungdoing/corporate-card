@@ -510,10 +510,13 @@ function saveEntry(){
     });
     if(dup){
       pending=entry;
+      var dd=(entry.date||'').split('-');
+      var dstr=dd[0]+'. '+dd[1]+'. '+dd[2];
+      var amtStr=(Number(amount)||0).toLocaleString('ko-KR')+'원';
       openSheet(
-        '<div class="sheet-h"><div class="sheet-title">동일한 내역이 있어요</div>'
-        +'<div class="sheet-sub">'+esc(entry.memo||'(메모 없음)')+' · '+won(amount)+' · '+entry.date.slice(5)+'</div></div>'
-        +'<div class="sheet-note">같은 날짜·금액·가맹점 내역이 이미 있습니다. 그래도 저장할까요?</div>'
+        '<div class="sheet-h"><div class="sheet-title">동일한 내역이 있어요</div></div>'
+        +'<div style="font-size:14px;color:var(--navy);line-height:1.55;margin:0 2px 12px">같은 날짜·가맹점·금액 내역이 이미 있습니다.<br>그래도 저장할까요?</div>'
+        +'<div class="sheet-note num">'+dstr+' · <b style="font-weight:500">'+esc(entry.memo||'(메모 없음)')+'</b> · <b style="font-weight:500">'+amtStr+'</b></div>'
         +'<button class="sheet-btn primary" onclick="confirmSave()"><i class="ti ti-check"></i> 네, 저장</button>'
         +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
       );
