@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>법인카드 관리</title>
+<meta name="theme-color" content="#1B2470">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="법인카드">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2">
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css"></noscript>
+<style>
+  @font-face{font-family:'SUIT Variable';font-weight:100 900;font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2') format('woff2-variations');}
+  :root{
+    --navy-bg:#1B2470; --navy:#1E2A8A; --blush:#F8D7CE; --blush-soft:#FBEAE3;
+    --blush-line:#EAD2C9; --row-cool:#F7F8FC; --white:#FFFFFF;
+    --t-muted:#8A90B8; --t-blush:#B0563C; --t-blush-meta:#B0708A; --pink-link:#C77A99;
+    --t-navy-meta:#C9CCEA;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--navy-bg);color:var(--white);
+    font-family:'SUIT Variable','Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-weight:400;-webkit-text-size-adjust:100%;min-height:100vh;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+  .wrap{max-width:480px;margin:0 auto;padding:18px 14px 56px}
+  .apptitle{display:flex;align-items:center;gap:9px;padding:4px 2px 16px}
+  .apptitle i{font-size:24px;color:var(--blush)}
+  .apptitle span{font-size:20px;font-weight:500;color:#fff}
+
+  .card{border-radius:20px;padding:20px 22px;margin-bottom:14px}
+  .card.white{background:var(--white);color:var(--navy)}
+  .card.summary{background:var(--blush);color:var(--navy)}
+
+  .mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .mnav b{font-size:16px;font-weight:700;color:var(--navy)}
+  .rbtn{width:36px;height:36px;border:0;border-radius:11px;background:var(--white);color:var(--navy);
+    display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .rbtn i{font-size:18px}
+  .rbtn:active{opacity:.7}
+
+  /* 한도 설정(미설정 시 상단) */
+  .limit-row{display:flex;gap:8px;margin-bottom:14px}
+  .limit-row input{flex:1}
+  .lhint{font-size:12px;color:var(--t-blush);margin-top:8px}
+
+  .lab{font-size:13px;color:var(--t-blush)}
+  .hero{font-size:28px;font-weight:700;letter-spacing:-.01em;margin:2px 0 14px;color:var(--navy)}
+  .hero.neg{color:#B0563C}
+
+  .gauge{height:8px;background:var(--white);border-radius:999px;overflow:hidden}
+  .gauge > i{display:block;height:100%;background:var(--navy);border-radius:999px;transition:width .35s}
+  .gmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--t-blush);margin-top:7px}
+
+  .stats{display:flex;gap:10px;margin-top:14px}
+  .stats .box{flex:1;background:var(--white);border-radius:13px;padding:11px 14px}
+  .stats .box.clickable{cursor:pointer}
+  .stats .box.clickable:active{background:#f1f2f8}
+  .stats .k{font-size:12px;color:var(--t-muted);display:flex;align-items:center;gap:4px}
+  .stats .v{font-size:16px;font-weight:700;color:var(--navy);margin-top:3px}
+
+  .extra{display:flex;gap:7px;align-items:center;margin-top:12px;padding:10px 13px;
+    background:var(--white);border-radius:14px;font-size:12px;color:var(--navy)}
+  .extra b{font-weight:500}
+
+  .flabel{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:500;color:var(--navy);margin-bottom:10px}
+  .flabel i{font-size:19px}
+  input,textarea,select{width:100%;border:0.5px solid var(--blush-line);border-radius:12px;
+    padding:12px 13px;font-size:14px;font-family:inherit;color:var(--navy);background:var(--white)}
+  input::placeholder,textarea::placeholder{color:#C08570;font-size:14px}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--navy)}
+  textarea{resize:vertical;min-height:92px;line-height:1.6;background:#FBFBFD}
+  .num-in{font-variant-numeric:tabular-nums}
+
+  .btn{width:100%;border:0;background:var(--navy);color:#fff;font-size:15px;font-weight:500;
+    padding:13px;border-radius:14px;cursor:pointer;font-family:inherit}
+  .btn:active{opacity:.85}
+  .btn.sm{width:auto;padding:12px 16px}
+  .btn.ghost{background:var(--white);color:var(--navy);border:0.5px solid var(--blush-line)}
+  .linkbtn{display:block;width:100%;text-align:center;background:none;border:0;color:var(--pink-link);
+    font-size:13px;font-weight:500;font-family:inherit;padding:14px 0 2px;cursor:pointer}
+
+  .fl{display:block;font-size:12px;color:var(--t-muted);margin:12px 2px 5px}
+  .grid2{display:flex;gap:8px}.grid2>div{flex:1}
+  .seg{display:flex;background:var(--row-cool);border-radius:12px;padding:3px}
+  .seg button{flex:1;border:0;background:transparent;padding:9px;border-radius:9px;font-size:13px;
+    font-weight:500;color:var(--t-muted);cursor:pointer;font-family:inherit}
+  .seg button.on{background:var(--white);color:var(--navy);box-shadow:0 0 0 0.5px var(--blush-line)}
+
+  /* 폼 헤더(닫기) */
+  .form-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+  .form-head .lhint{margin:0;flex:1}
+  .form-close{flex:none;border:0;background:var(--row-cool);color:var(--navy);width:30px;height:30px;
+    border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .form-close i{font-size:17px}
+
+  /* 리스트 */
+  .lhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .lhead h2{font-size:17px;font-weight:500;margin:0;color:var(--navy)}
+  .cbadge{font-size:12px;color:var(--t-blush);background:var(--blush);padding:3px 11px;border-radius:999px}
+  .item{display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:14px;margin-top:8px;cursor:pointer}
+  .item.r-blush{background:var(--blush-soft)}
+  .item.r-cool{background:var(--row-cool)}
+  .item:active{filter:brightness(.97)}
+  .item .m{flex:1;min-width:0}
+  .item .name{font-size:14px;font-weight:500;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .meta{font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .r-blush .meta{color:var(--t-blush-meta)}.r-cool .meta{color:var(--t-muted)}
+  .item .amt{font-size:15px;font-weight:700;color:var(--navy);flex:none}
+  .item .amt.cancel{color:#B0563C;text-decoration:line-through}
+  .pill{display:inline-block;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:5px;vertical-align:middle}
+  .pill.sms{background:var(--white);color:var(--t-muted);border:0.5px solid var(--blush-line)}
+  .pill.excl{background:var(--white);color:var(--navy);border:0.5px solid var(--navy)}
+  .empty{text-align:center;color:var(--t-muted);font-size:13px;padding:22px 0}
+  .skel{text-align:center;color:var(--t-muted);font-size:13px;padding:26px 0}
+
+  .setup{background:#fff;color:var(--navy);border-radius:16px;padding:18px;font-size:13px;line-height:1.6}
+  .setup code{background:var(--row-cool);padding:1px 5px;border-radius:5px;font-size:12px}
+
+  /* 모달 / 바텀시트 */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,21,63,.45);display:flex;align-items:flex-end;
+    justify-content:center;z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}
+  .modal-bg.show{opacity:1;pointer-events:auto}
+  .sheet{background:#fff;color:var(--navy);width:100%;max-width:480px;border-radius:22px 22px 0 0;
+    padding:8px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(26px);transition:transform .25s}
+  .modal-bg.show .sheet{transform:translateY(0)}
+  .sheet-grip{width:38px;height:4px;background:#E2E2EA;border-radius:999px;margin:8px auto 14px}
+  .sheet-h{margin:0 2px 12px}
+  .sheet-title{font-size:16px;font-weight:700;color:var(--navy)}
+  .sheet-sub{font-size:13px;color:var(--t-muted);margin-top:3px}
+  .sheet-note{font-size:13px;color:var(--navy);background:var(--row-cool);border-radius:12px;padding:11px 13px;margin:6px 0;line-height:1.5}
+  .sheet-btn{width:100%;border:0;background:var(--row-cool);color:var(--navy);font-size:15px;font-weight:500;
+    padding:14px;border-radius:13px;cursor:pointer;font-family:inherit;margin-top:8px;
+    display:flex;align-items:center;justify-content:center;gap:7px}
+  .sheet-btn i{font-size:18px}
+  .sheet-btn.primary{background:var(--navy);color:#fff}
+  .sheet-btn.danger{background:#FBEAEA;color:#C0392B}
+  .sheet-btn.ghost{background:transparent;color:var(--t-muted)}
+  .sheet input{margin-top:4px}
+
+  #toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(16px);
+    background:#0E153F;color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;opacity:0;
+    transition:.25s;pointer-events:none;z-index:90;max-width:88%}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;
+    border-radius:50%;animation:r .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes r{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="apptitle"><i class="ti ti-credit-card"></i><span>법인카드 관리</span></div>
+
+  <div id="app" style="display:none">
+    <!-- 요약 -->
+    <div class="card summary">
+      <div class="mnav">
+        <button class="rbtn" onclick="moveMonth(-1)" aria-label="이전 달"><i class="ti ti-chevron-left"></i></button>
+        <b id="ymLabel">—</b>
+        <button class="rbtn" onclick="moveMonth(1)" aria-label="다음 달"><i class="ti ti-chevron-right"></i></button>
+      </div>
+
+      <!-- 한도 설정: 한도 미설정일 때만 (상단) -->
+      <div id="limitSetup" style="display:none">
+        <div class="limit-row">
+          <input type="text" id="limitInput" class="num-in" inputmode="numeric" placeholder="이 달 한도 (원)">
+          <button class="btn sm" onclick="saveLimit()">한도 저장</button>
+        </div>
+        <div class="lhint" style="margin-top:0;margin-bottom:6px">한도를 입력하면 남은 금액이 계산됩니다.</div>
+      </div>
+
+      <div class="lab">이번 달 남은 금액</div>
+      <div class="hero num" id="remain">—</div>
+      <div class="gauge"><i id="gauge" style="width:0%"></i></div>
+      <div class="gmeta"><span id="usedPct">한도 미설정</span><span id="usedOfLimit"></span></div>
+      <div class="stats">
+        <div class="box" id="limitBox"><div class="k">한도 <i class="ti ti-pencil" id="limitPencil" style="font-size:11px;opacity:.55;display:none"></i></div><div class="v num" id="limitV">—</div></div>
+        <div class="box"><div class="k">사용액</div><div class="v num" id="usedV">—</div></div>
+      </div>
+      <div class="extra" id="extra" style="display:none">
+        <i class="ti ti-info-circle"></i><span id="extraText"></span>
+      </div>
+    </div>
+
+    <!-- 입력 -->
+    <div class="card white">
+      <div class="flabel"><i class="ti ti-clipboard-text"></i>카드 문자 붙여넣기</div>
+      <textarea id="smsText" placeholder="카드 승인 문자를 통째로 붙여넣으세요.&#10;예) 금액 12,300원 / 거래시간 06/02 14:57 / 사용처 OOO"></textarea>
+      <div style="margin-top:12px"><button class="btn" onclick="analyzeSms()"><i class="ti ti-search" style="font-size:17px;vertical-align:-2px;margin-right:6px"></i>문자 분석</button></div>
+      <button class="linkbtn" id="manualLink" onclick="toggleManual()"><i class="ti ti-pencil" style="font-size:15px;vertical-align:-2px;margin-right:5px"></i>문자가 없으면 직접 입력할게요</button>
+
+      <div id="entryForm" style="display:none">
+        <div class="form-head">
+          <span class="lhint" id="formNote" style="color:var(--t-muted)"></span>
+          <button class="form-close" onclick="cancelEntry()" aria-label="닫기"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="grid2">
+          <div><label class="fl">날짜</label><input type="date" id="fDate"></div>
+          <div><label class="fl">금액 (원)</label><input type="text" id="fAmount" class="num-in" inputmode="numeric" placeholder="0"></div>
+        </div>
+        <label class="fl">가맹점 / 메모</label>
+        <input type="text" id="fMemo" placeholder="가맹점명 또는 메모">
+        <div class="grid2">
+          <div><label class="fl">카드사</label><input type="text" id="fCard" placeholder="하나카드"></div>
+          <div><label class="fl">구분</label><select id="fType"><option>승인</option><option>취소</option></select></div>
+        </div>
+        <label class="fl">한도 반영 여부</label>
+        <div class="seg" id="segLimit">
+          <button type="button" id="segApply" class="on" onclick="setInLimit('적용')">한도 적용</button>
+          <button type="button" id="segExcl" onclick="setInLimit('제외')">한도 제외</button>
+        </div>
+        <div class="lhint" id="inLimitHint" style="color:var(--t-muted)">남은 금액 계산에 포함됩니다.</div>
+        <div style="margin-top:14px"><button class="btn" id="saveBtn" onclick="saveEntry()">저장</button></div>
+      </div>
+    </div>
+
+    <!-- 내역 -->
+    <div class="card white">
+      <div class="lhead"><h2>이번 달 내역</h2><span class="cbadge" id="cnt">0건</span></div>
+      <div id="list"><div class="skel">불러오는 중…</div></div>
+    </div>
+  </div>
+
+  <div id="setup" class="setup" style="display:none">
+    <b>설정이 필요합니다</b><br>
+    Vercel 환경변수(<code>SHEET_ID</code> 등)와 배포를 완료해 주세요.
+  </div>
+</div>
+
+<!-- 모달 -->
+<div id="modalBg" class="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="sheet"><div class="sheet-grip"></div><div id="modalSheet"></div></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ===== 설정 ===== */
+var API_URL = '/api/sheet';
+var TOKEN   = 'db5897887e5c87e2d919468a03031285fe396f9f7c07f0cd';
+
+/* ===== 상태 ===== */
+var curYm = ymOf(new Date());
+var curEntries = [];
+var curData = null;
+var editingId = null;
+var lastSource = '수동';
+var curInLimit = '적용';
+var curTime = '';
+var pending = null;
+
+function ymOf(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1); }
+function pad(n){ n=String(n); return n.length<2?'0'+n:n; }
+function won(n){ return '₩'+(Number(n)||0).toLocaleString('ko-KR'); }
+function onlyNum(s){ return String(s||'').replace(/[^\d-]/g,''); }
+function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function curYmLabel(){ var p=curYm.split('-'); return p[0]+'년 '+Number(p[1])+'월'; }
+function findEntry(id){ for(var i=0;i<curEntries.length;i++) if(curEntries[i].id===id) return curEntries[i]; return null; }
+
+/* ===== API ===== */
+function api(action, payload){
+  var body = Object.assign({ token:TOKEN, action:action }, payload||{});
+  return fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+    .then(function(r){ return r.json(); }).then(function(j){ if(j.error) throw new Error(j.error); return j.data; });
+}
+
+/* ===== 초기화 ===== */
+window.addEventListener('load', function(){
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+  document.getElementById('app').style.display='block';
+  load();
+});
+function load(){
+  var cached=null;
+  try{ cached=JSON.parse(localStorage.getItem('cardapp_'+curYm)); }catch(e){}
+  if(cached){ render(cached); }
+  else { document.getElementById('list').innerHTML='<div class="skel">불러오는 중…</div>'; }
+  api('getMonth',{ym:curYm}).then(render).catch(function(e){
+    if(!cached) document.getElementById('list').innerHTML='<div class="empty">불러오기 실패: '+esc(e.message)+'</div>';
+  });
+}
+function moveMonth(d){ var p=curYm.split('-'); curYm=ymOf(new Date(Number(p[0]),Number(p[1])-1+d,1)); load(); }
+
+/* ===== 렌더 ===== */
+function render(data){
+  curYm=data.ym; curData=data;
+  try{ localStorage.setItem('cardapp_'+data.ym, JSON.stringify(data)); }catch(e){}
+  var p=curYm.split('-');
+  document.getElementById('ymLabel').textContent=p[0]+'년 '+Number(p[1])+'월';
+
+  var remain=data.remaining, rEl=document.getElementById('remain');
+  rEl.textContent=(remain<0?'-':'')+won(Math.abs(remain));
+  rEl.className='hero num'+(remain<0?' neg':'');
+
+  var hasLimit=data.limit>0;
+  document.getElementById('limitV').textContent=hasLimit?won(data.limit):'미설정';
+  document.getElementById('usedV').textContent=won(data.used);
+
+  var pct=hasLimit?Math.min(100,Math.round(data.used/data.limit*100)):0;
+  document.getElementById('gauge').style.width=pct+'%';
+  document.getElementById('usedPct').textContent=hasLimit?('사용 '+pct+'%'):'한도 미설정';
+  document.getElementById('usedOfLimit').textContent=hasLimit?(won(data.used)+' / '+won(data.limit)):'';
+
+  var ex=document.getElementById('extra');
+  if(data.extra){ document.getElementById('extraText').innerHTML='한도 외 사용 <b>'+won(data.extra)+'</b> 별도 (한도 미반영)'; ex.style.display='flex'; }
+  else ex.style.display='none';
+
+  // 한도 설정/수정 UI (설정 전: 상단 인풋 / 설정 후: 숨김 + 한도 클릭 수정)
+  document.getElementById('limitSetup').style.display=hasLimit?'none':'block';
+  if(!hasLimit) document.getElementById('limitInput').value='';
+  var lb=document.getElementById('limitBox');
+  lb.classList.toggle('clickable',hasLimit);
+  lb.onclick=hasLimit?openLimitModal:null;
+  document.getElementById('limitPencil').style.display=hasLimit?'inline-block':'none';
+
+  // 리스트 (아이콘·인라인버튼 없음, 행 클릭 → 메뉴)
+  curEntries=data.entries;
+  document.getElementById('cnt').textContent=data.entries.length+'건';
+  var list=document.getElementById('list');
+  if(!data.entries.length){ list.innerHTML='<div class="empty">아직 등록된 내역이 없습니다.</div>'; return; }
+  var html='';
+  data.entries.forEach(function(e,i){
+    var dd=e.date.split('-'), cancel=e.type==='취소';
+    var tone=(i%2===0)?'r-blush':'r-cool';
+    var dt=dd[1]+'/'+dd[2]+(e.time?' '+e.time:'');
+    var meta=[dt, e.card].filter(Boolean).join(' · ');
+    var pills=(e.source==='문자'?'<span class="pill sms">문자</span>':'')+(e.inLimit==='제외'?'<span class="pill excl">한도외</span>':'');
+    html+='<div class="item '+tone+'" onclick="rowMenu(\''+e.id+'\')">'
+      +'<div class="m"><div class="name">'+esc(e.memo||'(메모 없음)')+pills+'</div><div class="meta">'+esc(meta)+'</div></div>'
+      +'<div class="amt num'+(cancel?' cancel':'')+'">'+(cancel?'-':'')+won(e.amount)+'</div>'
+      +'</div>';
+  });
+  list.innerHTML=html;
+}
+
+/* ===== 모달 ===== */
+function openSheet(html){ document.getElementById('modalSheet').innerHTML=html; document.getElementById('modalBg').classList.add('show'); }
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+
+/* 행 클릭 → 수정/삭제 */
+function rowMenu(id){
+  var e=findEntry(id); if(!e) return;
+  var dd=e.date.split('-');
+  var sub=dd[1]+'/'+dd[2]+(e.time?' '+e.time:'')+(e.card?' · '+e.card:'');
+  openSheet(
+    '<div class="sheet-h"><div class="sheet-title">'+esc(e.memo||'(메모 없음)')+'</div>'
+    +'<div class="sheet-sub">'+esc(sub)+' · '+won(e.amount)+'</div></div>'
+    +'<button class="sheet-btn" onclick="closeModal();editEntry(\''+id+'\')"><i class="ti ti-pencil"></i> 수정</button>'
+    +'<button class="sheet-btn danger" onclick="askDelete(\''+id+'\')"><i class="ti ti-trash"></i> 삭제</button>'
+    +'<button class="sheet-btn ghost" onclick="closeModal()">닫기</button>'
+  );
+}
+function askDelete(id){
+  var e=findEntry(id); if(!e) return;
+  openSheet(
+    '<div class="sheet-h"><div class="sheet-title">내역을 삭제할까요?</div>'
+    +'<div class="sheet-sub">'+esc(e.memo||'(메모 없음)')+' · '+won(e.amount)+'</div></div>'
+    +'<button class="sheet-btn danger" onclick="doDelete(\''+id+'\')"><i class="ti ti-trash"></i> 삭제</button>'
+    +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
+  );
+}
+function doDelete(id){ closeModal(); busy('삭제 중…'); api('delete',{id:id,ym:curYm}).then(function(d){ toast('삭제됨'); render(d); }).catch(failToast); }
+
+/* 한도 수정 모달 */
+function openLimitModal(){
+  var cur = curData? curData.limit : 0;
+  openSheet(
+    '<div class="sheet-h"><div class="sheet-title">월 한도 '+(cur?'수정':'설정')+'</div>'
+    +'<div class="sheet-sub">'+curYmLabel()+'</div></div>'
+    +'<input type="text" id="mLimit" class="num-in" inputmode="numeric" placeholder="한도 금액 (원)" value="'+(cur?cur.toLocaleString('ko-KR'):'')+'">'
+    +'<button class="sheet-btn primary" onclick="saveLimitModal()">저장</button>'
+    +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
+  );
+  var mi=document.getElementById('mLimit');
+  mi.addEventListener('input',function(){ var n=onlyNum(this.value); this.value=n?Number(n).toLocaleString('ko-KR'):''; });
+  setTimeout(function(){ mi.focus(); },50);
+}
+function saveLimitModal(){
+  var v=onlyNum(document.getElementById('mLimit').value);
+  if(!v){ toast('한도 금액을 입력하세요'); return; }
+  closeModal(); busy('저장 중…');
+  api('setLimit',{ym:curYm,limit:v}).then(function(d){ toast('한도 저장됨'); render(d); }).catch(failToast);
+}
+
+/* ===== 입력 폼 ===== */
+function toggleManual(){
+  var f=document.getElementById('entryForm');
+  if(f.style.display==='block' && !editingId){ cancelEntry(); return; }
+  resetEdit(); document.getElementById('formNote').textContent='직접 입력';
+  showForm({date:todayStr(),card:'하나카드'}); lastSource='수동';
+  document.getElementById('manualLink').style.display='none';
+}
+function showForm(v){
+  document.getElementById('fDate').value=v.date||todayStr();
+  document.getElementById('fAmount').value=v.amount?Number(v.amount).toLocaleString('ko-KR'):'';
+  document.getElementById('fMemo').value=v.memo||'';
+  document.getElementById('fCard').value=v.card||'';
+  document.getElementById('fType').value=v.type||'승인';
+  curTime=v.time||'';
+  setInLimit(v.inLimit||'적용');
+  document.getElementById('entryForm').style.display='block';
+}
+function setInLimit(val){
+  curInLimit=val; var apply=val==='적용';
+  document.getElementById('segApply').classList.toggle('on',apply);
+  document.getElementById('segExcl').classList.toggle('on',!apply);
+  document.getElementById('inLimitHint').textContent=apply?'남은 금액 계산에 포함됩니다.':'남은 금액에서 빠지고, 내역에 ‘한도외’로 표시됩니다.';
+}
+function resetEdit(){ editingId=null; document.getElementById('saveBtn').textContent='저장'; }
+function cancelEntry(){
+  resetEdit();
+  document.getElementById('entryForm').style.display='none';
+  document.getElementById('formNote').textContent='';
+  document.getElementById('manualLink').style.display='block';
+}
+
+document.getElementById('fAmount').addEventListener('input',function(){var n=onlyNum(this.value);this.value=n?Number(n).toLocaleString('ko-KR'):'';});
+document.getElementById('limitInput').addEventListener('input',function(){var n=onlyNum(this.value);this.value=n?Number(n).toLocaleString('ko-KR'):'';});
+
+/* ===== 문자 분석 ===== */
+function analyzeSms(){
+  var raw=document.getElementById('smsText').value;
+  if(!raw.trim()){ toast('문자 내용을 붙여넣어 주세요'); return; }
+  var pr=parseCardSms(raw); lastSource='문자'; resetEdit();
+  document.getElementById('manualLink').style.display='none';
+  document.getElementById('formNote').innerHTML='문자에서 추출 — 확인 후 저장'+(pr.amount?'':' <b>(금액 인식 실패)</b>');
+  showForm(pr);
+  if(!pr.amount) document.getElementById('fAmount').focus();
+}
+function parseCardSms(raw){
+  var text=raw.replace(/\r/g,'');
+  var lines=text.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var type=/취소/.test(text)?'취소':'승인';
+  var f={};
+  lines.forEach(function(L){
+    var m=L.match(/^(금액|이용금액|승인금액|카드|회원명|거래구분|거래시간|승인일시|이용일시|사용처|가맹점|가맹점명)\s*[:：]?\s*(.+)$/);
+    if(m) f[m[1]]=m[2].trim();
+  });
+  var amtRaw=f['금액']||f['이용금액']||f['승인금액'];
+  var merch=f['사용처']||f['가맹점']||f['가맹점명'];
+  if(amtRaw || merch){
+    var amount=onlyNum(((amtRaw||'').match(/([\d,]{2,})/)||[])[1]||'');
+    var card=cardLabel(f['카드']||'');
+    var d=parseDateTime(f['거래시간']||f['승인일시']||f['이용일시']||'');
+    var memo=(merch||'').replace(/\(.*?\)/g,'').trim();
+    return {date:d.date,time:d.time,amount:amount,memo:memo,card:card||'하나카드',type:type};
+  }
+  var cards=['하나','신한','삼성','현대','국민','KB','롯데','우리','BC','비씨','농협','NH','카카오','씨티','토스'];
+  var card2=''; for(var i=0;i<cards.length;i++){ if(text.indexOf(cards[i])>=0){card2=cards[i];break;} }
+  if(card2){ card2=card2.replace('KB','국민').replace('NH','농협').replace('비씨','BC')+'카드'; }
+  var amount2='';
+  for(var li=0;li<lines.length;li++){
+    if(/누적|잔여|잔액|한도|가용|포인트/.test(lines[li])) continue;
+    var am=lines[li].match(/([\d,]{2,})\s*원/); if(am){ amount2=onlyNum(am[1]); break; }
+  }
+  if(!amount2){ var am2=text.replace(/누적[^\d]*[\d,]+원/g,'').match(/([\d,]{3,})\s*원/); if(am2) amount2=onlyNum(am2[1]); }
+  var d2=parseDateTime(text);
+  var memo2='', cand=[];
+  for(var k=0;k<lines.length;k++){
+    var L=lines[k];
+    if(/원|누적|잔여|잔액|한도|승인|취소|일시불|할부|Web발신|web발신|\[.*\]/.test(L)) continue;
+    if(/^\d{1,2}[.\/:]\d/.test(L)||/^\d{1,2}:\d{2}/.test(L)) continue;
+    if(/^[가-힣]{2,4}님?$/.test(L)&&L.length<=4) continue;
+    if(cards.some(function(c){return L.indexOf(c)>=0;})&&L.length<8) continue;
+    cand.push(L);
+  }
+  if(cand.length){ cand.sort(function(a,b){return b.length-a.length;}); memo2=cand[0].replace(/\(.*?\)/g,'').trim(); }
+  return {date:d2.date,time:d2.time,amount:amount2,memo:memo2,card:card2||'하나카드',type:type};
+}
+function cardLabel(v){
+  if(!v) return '';
+  var bank=((v.match(/[가-힣A-Za-z]+/)||[''])[0]).replace(/카드$/,'');
+  var last=(v.match(/(\d{3,4})/)||[])[1];
+  if(!bank) return '';
+  return bank+'카드'+(last?'('+last+')':'');
+}
+function parseDateTime(s){
+  s=String(s||''); var date='', time='';
+  var full=s.match(/(20\d{2})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+  if(full){ date=full[1]+'-'+pad(full[2])+'-'+pad(full[3]); }
+  else{ var md=s.match(/(?:^|[^\d])(\d{1,2})[.\/](\d{1,2})(?![\d])/); if(md){ date=new Date().getFullYear()+'-'+pad(md[1])+'-'+pad(md[2]); } }
+  if(!date) date=todayStr();
+  var tm=s.match(/(\d{1,2}):(\d{2})/); if(tm) time=pad(tm[1])+':'+tm[2];
+  return {date:date,time:time};
+}
+
+/* ===== 저장 / 수정 / 삭제 ===== */
+function saveEntry(){
+  var amount=onlyNum(document.getElementById('fAmount').value);
+  if(!amount){ toast('금액을 입력하세요'); return; }
+  var entry={ date:document.getElementById('fDate').value, amount:amount,
+    memo:document.getElementById('fMemo').value.trim(), card:document.getElementById('fCard').value.trim(),
+    type:document.getElementById('fType').value, inLimit:curInLimit, time:curTime, source:lastSource };
+  // 동일 내역 확인(새 입력, 같은 달일 때)
+  if(!editingId){
+    var ym=(entry.date||'').substring(0,7);
+    var dup = (ym===curYm) && curEntries.some(function(e){
+      return e.date===entry.date && Number(e.amount)===Number(amount) && (e.memo||'')===(entry.memo||'');
+    });
+    if(dup){
+      pending=entry;
+      openSheet(
+        '<div class="sheet-h"><div class="sheet-title">동일한 내역이 있어요</div>'
+        +'<div class="sheet-sub">'+esc(entry.memo||'(메모 없음)')+' · '+won(amount)+' · '+entry.date.slice(5)+'</div></div>'
+        +'<div class="sheet-note">같은 날짜·금액·가맹점 내역이 이미 있습니다. 그래도 저장할까요?</div>'
+        +'<button class="sheet-btn primary" onclick="confirmSave()"><i class="ti ti-check"></i> 네, 저장</button>'
+        +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
+      );
+      return;
+    }
+  }
+  commitEntry(entry, !!editingId, editingId);
+}
+function confirmSave(){ closeModal(); var e=pending; pending=null; if(e) commitEntry(e,false,null); }
+function commitEntry(entry,isEdit,id){
+  var prevYm=curYm;
+  busy(isEdit?'수정 중…':'저장 중…');
+  var pr=isEdit?api('update',{id:id,entry:entry}):api('add',{entry:entry});
+  pr.then(function(d){
+    var moved = d.ym!==prevYm;
+    toast((isEdit?'수정':'저장')+'되었습니다'+(moved?(' · '+Number(d.ym.split('-')[1])+'월로 이동'):''));
+    document.getElementById('smsText').value='';
+    cancelEntry(); render(d);
+  }).catch(failToast);
+}
+function editEntry(id){
+  var e=findEntry(id); if(!e) return;
+  editingId=id; lastSource=e.source||'수동';
+  document.getElementById('manualLink').style.display='none';
+  document.getElementById('formNote').textContent='내역 수정 — 변경 후 ‘수정 저장’';
+  showForm(e);
+  document.getElementById('saveBtn').textContent='수정 저장';
+  document.getElementById('entryForm').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function saveLimit(){
+  var v=onlyNum(document.getElementById('limitInput').value);
+  if(!v){ toast('한도 금액을 입력하세요'); return; }
+  busy('저장 중…');
+  api('setLimit',{ym:curYm,limit:v}).then(function(d){ toast('한도 저장됨'); render(d); }).catch(failToast);
+}
+
+/* ===== 토스트 ===== */
+var toastT;
+function toast(msg){ var t=document.getElementById('toast'); t.innerHTML=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},2200); }
+function busy(msg){ toast('<span class="spin"></span>'+msg); }
+function failToast(e){ toast('오류: '+(e&&e.message?e.message:e)); }
+</script>
+</body>
+</html>
