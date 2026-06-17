@@ -109,16 +109,17 @@
   .lhead h2{font-size:17px;font-weight:500;margin:0;color:var(--navy)}
   .cbadge{font-size:12px;color:var(--t-blush);background:var(--blush);padding:3px 11px;border-radius:999px}
   .item{display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:14px;margin-top:8px;cursor:pointer}
-  .item.r-blush{background:var(--blush-soft)}
+  .item.r-blush{background:#F0F2F9}
   .item.r-cool{background:var(--row-cool)}
   .item:active{filter:brightness(.97)}
   .item .m{flex:1;min-width:0}
-  .item .name{font-size:14px;font-weight:500;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .item .meta{font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .r-blush .meta{color:var(--t-blush-meta)}.r-cool .meta{color:var(--t-muted)}
+  .item .name{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:500;color:var(--navy);min-width:0}
+  .item .name .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .item .meta{font-size:12px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .note{font-size:12px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.9}
   .item .amt{font-size:15px;font-weight:700;color:var(--navy);flex:none}
   .item .amt.cancel{color:#B0563C;text-decoration:line-through}
-  .pill{display:inline-block;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:5px;vertical-align:middle}
+  .pill{flex:none;font-size:10px;padding:2px 7px;border-radius:999px}
   .pill.sms{background:var(--white);color:var(--t-muted);border:0.5px solid var(--blush-line)}
   .pill.excl{background:var(--white);color:var(--navy);border:0.5px solid var(--navy)}
   .empty{text-align:center;color:var(--t-muted);font-size:13px;padding:22px 0}
@@ -208,8 +209,10 @@
           <div><label class="fl">날짜</label><input type="date" id="fDate"></div>
           <div><label class="fl">금액 (원)</label><input type="text" id="fAmount" class="num-in" inputmode="numeric" placeholder="0"></div>
         </div>
-        <label class="fl">가맹점 / 메모</label>
-        <input type="text" id="fMemo" placeholder="가맹점명 또는 메모">
+        <label class="fl">가맹점 <span style="color:var(--t-blush)">*</span></label>
+        <input type="text" id="fMemo" placeholder="가맹점명">
+        <label class="fl">메모 <span style="color:var(--t-muted);font-weight:400">(선택)</span></label>
+        <input type="text" id="fNote" placeholder="메모 (선택 입력)">
         <div class="grid2">
           <div><label class="fl">카드사</label><input type="text" id="fCard" placeholder="하나카드"></div>
           <div><label class="fl">구분</label><select id="fType"><option>승인</option><option>취소</option></select></div>
@@ -336,8 +339,9 @@ function render(data){
     var dt=dd[1]+'/'+dd[2]+(e.time?' '+e.time:'');
     var meta=[dt, e.card].filter(Boolean).join(' · ');
     var pills=(e.source==='문자'?'<span class="pill sms">문자</span>':'')+(e.inLimit==='제외'?'<span class="pill excl">한도외</span>':'');
+    var noteHtml=e.note?'<div class="note">'+esc(e.note)+'</div>':'';
     html+='<div class="item '+tone+'" onclick="rowMenu(\''+e.id+'\')">'
-      +'<div class="m"><div class="name">'+esc(e.memo||'(메모 없음)')+pills+'</div><div class="meta">'+esc(meta)+'</div></div>'
+      +'<div class="m"><div class="name"><span class="nm">'+esc(e.memo||'(가맹점 없음)')+'</span>'+pills+'</div><div class="meta">'+esc(meta)+'</div>'+noteHtml+'</div>'
       +'<div class="amt num'+(cancel?' cancel':'')+'">'+(cancel?'-':'')+won(e.amount)+'</div>'
       +'</div>';
   });
@@ -354,8 +358,9 @@ function rowMenu(id){
   var dd=e.date.split('-');
   var sub=dd[1]+'/'+dd[2]+(e.time?' '+e.time:'')+(e.card?' · '+e.card:'');
   openSheet(
-    '<div class="sheet-h"><div class="sheet-title">'+esc(e.memo||'(메모 없음)')+'</div>'
+    '<div class="sheet-h"><div class="sheet-title">'+esc(e.memo||'(가맹점 없음)')+'</div>'
     +'<div class="sheet-sub">'+esc(sub)+' · '+won(e.amount)+'</div></div>'
+    +(e.note?'<div class="sheet-note">메모 · '+esc(e.note)+'</div>':'')
     +'<button class="sheet-btn" onclick="closeModal();editEntry(\''+id+'\')"><i class="ti ti-pencil"></i> 수정</button>'
     +'<button class="sheet-btn danger" onclick="askDelete(\''+id+'\')"><i class="ti ti-trash"></i> 삭제</button>'
     +'<button class="sheet-btn ghost" onclick="closeModal()">닫기</button>'
@@ -365,7 +370,7 @@ function askDelete(id){
   var e=findEntry(id); if(!e) return;
   openSheet(
     '<div class="sheet-h"><div class="sheet-title">내역을 삭제할까요?</div>'
-    +'<div class="sheet-sub">'+esc(e.memo||'(메모 없음)')+' · '+won(e.amount)+'</div></div>'
+    +'<div class="sheet-sub">'+esc(e.memo||'(가맹점 없음)')+' · '+won(e.amount)+'</div></div>'
     +'<button class="sheet-btn danger" onclick="doDelete(\''+id+'\')"><i class="ti ti-trash"></i> 삭제</button>'
     +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
   );
@@ -405,6 +410,7 @@ function showForm(v){
   document.getElementById('fDate').value=v.date||todayStr();
   document.getElementById('fAmount').value=v.amount?Number(v.amount).toLocaleString('ko-KR'):'';
   document.getElementById('fMemo').value=v.memo||'';
+  document.getElementById('fNote').value=v.note||'';
   document.getElementById('fCard').value=v.card||'';
   document.getElementById('fType').value=v.type||'승인';
   curTime=v.time||'';
@@ -499,8 +505,10 @@ function parseDateTime(s){
 function saveEntry(){
   var amount=onlyNum(document.getElementById('fAmount').value);
   if(!amount){ toast('금액을 입력하세요'); return; }
+  var memo=document.getElementById('fMemo').value.trim();
+  if(!memo){ toast('가맹점을 입력하세요'); document.getElementById('fMemo').focus(); return; }
   var entry={ date:document.getElementById('fDate').value, amount:amount,
-    memo:document.getElementById('fMemo').value.trim(), card:document.getElementById('fCard').value.trim(),
+    memo:memo, note:document.getElementById('fNote').value.trim(), card:document.getElementById('fCard').value.trim(),
     type:document.getElementById('fType').value, inLimit:curInLimit, time:curTime, source:lastSource };
   // 동일 내역 확인(새 입력, 같은 달일 때)
   if(!editingId){
@@ -516,7 +524,7 @@ function saveEntry(){
       openSheet(
         '<div class="sheet-h"><div class="sheet-title">동일한 내역이 있어요</div></div>'
         +'<div style="font-size:14px;color:var(--navy);line-height:1.55;margin:0 2px 12px">같은 날짜·가맹점·금액 내역이 이미 있습니다.<br>그래도 저장할까요?</div>'
-        +'<div class="sheet-note num">'+dstr+' · <b style="font-weight:500">'+esc(entry.memo||'(메모 없음)')+'</b> · <b style="font-weight:500">'+amtStr+'</b></div>'
+        +'<div class="sheet-note num">'+dstr+' · <b style="font-weight:500">'+esc(entry.memo||'(가맹점 없음)')+'</b> · <b style="font-weight:500">'+amtStr+'</b></div>'
         +'<button class="sheet-btn primary" onclick="confirmSave()"><i class="ti ti-check"></i> 네, 저장</button>'
         +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
       );
