@@ -18,7 +18,7 @@ const TOKEN = process.env.API_TOKEN;
 
 const ENTRIES = '내역';
 const SETTINGS = '설정';
-const HEADERS = ['id', '날짜', '시간', '금액', '가맹점/메모', '카드사', '구분', '한도반영', '입력방식', '등록일시'];
+const HEADERS = ['id', '날짜', '시간', '금액', '가맹점/메모', '카드사', '구분', '한도반영', '입력방식', '등록일시', '메모'];
 
 /* ===== 인증: 서비스 계정 JWT → access token ===== */
 let _tok = null, _exp = 0;
@@ -113,7 +113,8 @@ async function getMonth(ym) {
     entries.push({
       id: String(id), date, time: normTime(r[m['시간']]),
       amount: Number(r[m['금액']]) || 0, memo: r[m['가맹점/메모']] || '', card: r[m['카드사']] || '',
-      type: r[m['구분']] || '승인', inLimit: (r[m['한도반영']] === '제외') ? '제외' : '적용', source: r[m['입력방식']] || ''
+      type: r[m['구분']] || '승인', inLimit: (r[m['한도반영']] === '제외') ? '제외' : '적용',
+      note: r[m['메모']] || '', source: r[m['입력방식']] || ''
     });
   }
   entries.sort((a, b) => a.date !== b.date ? (a.date < b.date ? 1 : -1) : (a.time < b.time ? 1 : (a.time > b.time ? -1 : 0)));
@@ -150,6 +151,7 @@ async function addEntry(e) {
   set(row, m, '한도반영', e.inLimit === '제외' ? '제외' : '적용');
   set(row, m, '입력방식', e.source || '수동');
   set(row, m, '등록일시', nowStr());
+  set(row, m, '메모', e.note || '');
   await appendValues(ENTRIES + '!A1', row);
   return getMonth(date.substring(0, 7));
 }
@@ -168,6 +170,7 @@ async function updateEntry(id, e) {
       set(row, m, '카드사', e.card || '');
       set(row, m, '구분', e.type || '승인');
       set(row, m, '한도반영', e.inLimit === '제외' ? '제외' : '적용');
+      set(row, m, '메모', e.note || '');
       const rr = i + 2;
       await updateValues(ENTRIES + '!A' + rr + ':' + colLetter(t.header.length) + rr, [row]);
       return getMonth(date.substring(0, 7));
