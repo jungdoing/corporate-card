@@ -12,10 +12,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="법인카드">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://script.google.com">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css" rel="stylesheet">
 <style>
+  @font-face{font-family:'SUIT Variable';font-weight:100 900;font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2') format('woff2-variations');}
   :root{
     --navy-bg:#1B2470; --navy:#1E2A8A; --blush:#F8D7CE; --blush-soft:#FBEAE3;
     --blush-line:#EAD2C9; --row-cool:#F7F8FC; --white:#FFFFFF;
@@ -25,37 +27,39 @@
   *{box-sizing:border-box}
   html,body{margin:0}
   body{background:var(--navy-bg);color:var(--white);
-    font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-family:'SUIT Variable','Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
     font-weight:400;-webkit-text-size-adjust:100%;min-height:100vh;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
   .wrap{max-width:480px;margin:0 auto;padding:18px 14px 56px}
-  h1{font-size:20px;font-weight:500;margin:6px 2px 4px;color:#fff}
-  .sub{font-size:12px;color:var(--t-navy-meta);margin:0 2px 16px}
+  .apptitle{display:flex;align-items:center;gap:9px;padding:4px 2px 16px}
+  .apptitle i{font-size:24px;color:var(--blush)}
+  .apptitle span{font-size:20px;font-weight:500;color:#fff}
 
-  .card{border-radius:20px;padding:20px;margin-bottom:14px}
+  .card{border-radius:20px;padding:20px 22px;margin-bottom:14px}
   .card.white{background:var(--white);color:var(--navy)}
   .card.summary{background:var(--blush);color:var(--navy)}
 
   /* 월 네비 */
   .mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  .mnav b{font-size:16px;font-weight:500;color:var(--navy)}
-  .rbtn{width:36px;height:36px;border:0;border-radius:50%;background:var(--white);color:var(--navy);
-    font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .mnav b{font-size:15px;font-weight:500;color:var(--navy)}
+  .rbtn{width:36px;height:36px;border:0;border-radius:11px;background:var(--white);color:var(--navy);
+    display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .rbtn i{font-size:18px}
   .rbtn:active{opacity:.7}
 
   .lab{font-size:13px;color:var(--t-blush)}
-  .hero{font-size:28px;font-weight:500;letter-spacing:-.01em;margin:2px 0 14px;color:var(--navy)}
+  .hero{font-size:28px;font-weight:700;letter-spacing:-.01em;margin:2px 0 14px;color:var(--navy)}
   .hero.neg{color:#B0563C}
 
-  .gauge{height:10px;background:var(--white);border-radius:999px;overflow:hidden}
+  .gauge{height:8px;background:var(--white);border-radius:999px;overflow:hidden}
   .gauge > i{display:block;height:100%;background:var(--navy);border-radius:999px;transition:width .35s}
   .gmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--t-blush);margin-top:7px}
 
   .stats{display:flex;gap:10px;margin-top:14px}
-  .stats .box{flex:1;background:var(--white);border-radius:14px;padding:12px 14px}
-  .stats .k{font-size:11px;color:var(--t-muted)}
-  .stats .v{font-size:15px;font-weight:500;color:var(--navy);margin-top:3px}
+  .stats .box{flex:1;background:var(--white);border-radius:13px;padding:11px 14px}
+  .stats .k{font-size:12px;color:var(--t-muted)}
+  .stats .v{font-size:16px;font-weight:700;color:var(--navy);margin-top:3px}
 
   .extra{display:flex;gap:7px;align-items:center;margin-top:12px;padding:10px 13px;
     background:var(--white);border-radius:14px;font-size:12px;color:var(--navy)}
@@ -69,10 +73,10 @@
   .flabel{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:500;color:var(--navy);margin-bottom:10px}
   .flabel i{font-size:19px}
   input,textarea,select{width:100%;border:0.5px solid var(--blush-line);border-radius:12px;
-    padding:12px 13px;font-size:15px;font-family:inherit;color:var(--navy);background:var(--white)}
-  input::placeholder,textarea::placeholder{color:#B9BEDA}
+    padding:12px 13px;font-size:14px;font-family:inherit;color:var(--navy);background:var(--white)}
+  input::placeholder,textarea::placeholder{color:#C08570;font-size:14px}
   input:focus,textarea:focus,select:focus{outline:none;border-color:var(--navy)}
-  textarea{resize:vertical;min-height:92px;line-height:1.55}
+  textarea{resize:vertical;min-height:92px;line-height:1.6;background:#FBFBFD}
   .num-in{font-variant-numeric:tabular-nums}
 
   .btn{width:100%;border:0;background:var(--navy);color:#fff;font-size:15px;font-weight:500;
@@ -81,7 +85,7 @@
   .btn.sm{width:auto;padding:12px 16px}
   .btn.ghost{background:var(--white);color:var(--navy);border:0.5px solid var(--blush-line)}
   .linkbtn{display:block;width:100%;text-align:center;background:none;border:0;color:var(--pink-link);
-    font-size:13px;font-family:inherit;padding:12px 0 2px;cursor:pointer}
+    font-size:13px;font-weight:500;font-family:inherit;padding:14px 0 2px;cursor:pointer}
 
   .fl{display:block;font-size:12px;color:var(--t-muted);margin:12px 2px 5px}
   .grid2{display:flex;gap:8px}.grid2>div{flex:1}
@@ -94,18 +98,18 @@
   .lhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
   .lhead h2{font-size:17px;font-weight:500;margin:0;color:var(--navy)}
   .cbadge{font-size:12px;color:var(--t-blush);background:var(--blush);padding:3px 11px;border-radius:999px}
-  .item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:14px;margin-top:6px}
+  .item{display:flex;align-items:center;gap:13px;padding:11px 13px;border-radius:14px;margin-top:8px}
   .item.r-blush{background:var(--blush-soft)}
   .item.r-cool{background:var(--row-cool)}
-  .ico{width:38px;height:38px;border-radius:12px;flex:none;display:flex;align-items:center;
-    justify-content:center;color:var(--navy);font-size:19px}
+  .ico{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;
+    justify-content:center;color:var(--navy);font-size:20px}
   .r-blush .ico{background:var(--row-cool)}
   .r-cool .ico{background:var(--blush-soft)}
   .item .m{flex:1;min-width:0}
   .item .name{font-size:14px;font-weight:500;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .item .meta{font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .r-blush .meta{color:var(--t-blush-meta)}.r-cool .meta{color:var(--t-muted)}
-  .item .amt{font-size:15px;font-weight:500;color:var(--navy);flex:none}
+  .item .amt{font-size:15px;font-weight:700;color:var(--navy);flex:none}
   .item .amt.cancel{color:#B0563C;text-decoration:line-through}
   .pill{display:inline-block;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:5px;vertical-align:middle}
   .pill.sms{background:var(--white);color:var(--t-muted);border:0.5px solid var(--blush-line)}
@@ -128,24 +132,23 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>법인카드 관리</h1>
-  <p class="sub">카드 문자를 붙여넣어 간편하게 기록하세요</p>
+  <div class="apptitle"><i class="ti ti-credit-card"></i><span>법인카드 관리</span></div>
 
   <div id="app" style="display:none">
     <!-- 요약 -->
     <div class="card summary">
       <div class="mnav">
-        <button class="rbtn" onclick="moveMonth(-1)" aria-label="이전 달">‹</button>
+        <button class="rbtn" onclick="moveMonth(-1)" aria-label="이전 달"><i class="ti ti-chevron-left"></i></button>
         <b id="ymLabel">—</b>
-        <button class="rbtn" onclick="moveMonth(1)" aria-label="다음 달">›</button>
+        <button class="rbtn" onclick="moveMonth(1)" aria-label="다음 달"><i class="ti ti-chevron-right"></i></button>
       </div>
-      <div class="lab">이번 달 남은 금액 (한도 기준)</div>
+      <div class="lab">이번 달 남은 금액</div>
       <div class="hero num" id="remain">—</div>
       <div class="gauge"><i id="gauge" style="width:0%"></i></div>
       <div class="gmeta"><span id="usedPct">한도 미설정</span><span id="usedOfLimit"></span></div>
       <div class="stats">
         <div class="box"><div class="k">한도</div><div class="v num" id="limitV">—</div></div>
-        <div class="box"><div class="k">한도 사용액</div><div class="v num" id="usedV">—</div></div>
+        <div class="box"><div class="k">사용액</div><div class="v num" id="usedV">—</div></div>
       </div>
       <div class="extra" id="extra" style="display:none">
         <i class="ti ti-info-circle"></i><span id="extraText"></span>
@@ -159,10 +162,10 @@
 
     <!-- 입력 -->
     <div class="card white">
-      <div class="flabel"><i class="ti ti-message-2"></i>카드 문자 붙여넣기</div>
+      <div class="flabel"><i class="ti ti-clipboard-text"></i>카드 문자 붙여넣기</div>
       <textarea id="smsText" placeholder="카드 승인 문자를 통째로 붙여넣으세요.&#10;예) [Web발신] 하나카드(1234)승인 12,000원 일시불 06/17 14:23 스타벅스"></textarea>
-      <div style="margin-top:12px"><button class="btn" onclick="analyzeSms()">문자 분석</button></div>
-      <button class="linkbtn" id="manualLink" onclick="toggleManual()">문자가 없으면 직접 입력할게요</button>
+      <div style="margin-top:12px"><button class="btn" onclick="analyzeSms()"><i class="ti ti-search" style="font-size:17px;vertical-align:-2px;margin-right:6px"></i>문자 분석</button></div>
+      <button class="linkbtn" id="manualLink" onclick="toggleManual()"><i class="ti ti-pencil" style="font-size:15px;vertical-align:-2px;margin-right:5px"></i>문자가 없으면 직접 입력할게요</button>
 
       <div id="entryForm" style="display:none">
         <div class="lhint" id="formNote" style="color:var(--t-muted)"></div>
@@ -215,6 +218,7 @@ var curEntries = [];
 var editingId = null;
 var lastSource = '수동';
 var curInLimit = '적용';
+var curTime = '';
 
 function ymOf(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1); }
 function pad(n){ n=String(n); return n.length<2?'0'+n:n; }
@@ -248,9 +252,12 @@ window.addEventListener('load', function(){
 });
 
 function load(){
-  document.getElementById('list').innerHTML='<div class="skel">불러오는 중…</div>';
+  var cached=null;
+  try{ cached=JSON.parse(localStorage.getItem('cardapp_'+curYm)); }catch(e){}
+  if(cached){ render(cached); }
+  else { document.getElementById('list').innerHTML='<div class="skel">불러오는 중…</div>'; }
   api('getMonth',{ym:curYm}).then(render).catch(function(e){
-    document.getElementById('list').innerHTML='<div class="empty">불러오기 실패: '+esc(e.message)+'</div>';
+    if(!cached) document.getElementById('list').innerHTML='<div class="empty">불러오기 실패: '+esc(e.message)+'</div>';
   });
 }
 function moveMonth(d){
@@ -260,6 +267,7 @@ function moveMonth(d){
 /* ===== 렌더 ===== */
 function render(data){
   curYm=data.ym;
+  try{ localStorage.setItem('cardapp_'+data.ym, JSON.stringify(data)); }catch(e){}
   var p=curYm.split('-');
   document.getElementById('ymLabel').textContent=p[0]+'년 '+Number(p[1])+'월';
 
@@ -291,7 +299,8 @@ function render(data){
   data.entries.forEach(function(e,i){
     var dd=e.date.split('-'), cancel=e.type==='취소', cat=guessCategory(e.memo);
     var tone=(i%2===0)?'r-blush':'r-cool';
-    var meta=[cat.label, Number(dd[1])+'/'+Number(dd[2]), e.card].filter(Boolean).join(' · ');
+    var dt=dd[1]+'/'+dd[2]+(e.time?' '+e.time:'');
+    var meta=[cat.label, dt, e.card].filter(Boolean).join(' · ');
     var pills=(e.source==='문자'?'<span class="pill sms">문자</span>':'')+(e.inLimit==='제외'?'<span class="pill excl">한도외</span>':'');
     html+='<div class="item '+tone+'">'
       +'<div class="ico"><i class="ti '+cat.icon+'"></i></div>'
@@ -332,6 +341,7 @@ function showForm(v){
   document.getElementById('fMemo').value=v.memo||'';
   document.getElementById('fCard').value=v.card||'';
   document.getElementById('fType').value=v.type||'승인';
+  curTime=v.time||'';
   setInLimit(v.inLimit||'적용');
   document.getElementById('entryForm').style.display='block';
 }
@@ -367,22 +377,38 @@ function analyzeSms(){
   if(!pr.amount) document.getElementById('fAmount').focus();
 }
 function parseCardSms(raw){
-  var text=raw.replace(/\r/g,''), lines=text.split('\n').map(function(s){return s.trim();}).filter(Boolean);
-  var cards=['하나','신한','삼성','현대','국민','KB','롯데','우리','BC','비씨','농협','NH','카카오','씨티','토스'];
-  var card=''; for(var i=0;i<cards.length;i++){ if(text.indexOf(cards[i])>=0){card=cards[i];break;} }
-  if(card){ card=card.replace('KB','국민').replace('NH','농협').replace('비씨','BC')+'카드'; }
+  var text=raw.replace(/\r/g,'');
+  var lines=text.split('\n').map(function(s){return s.trim();}).filter(Boolean);
   var type=/취소/.test(text)?'취소':'승인';
-  var amount='';
+
+  // (1) 라벨형 포맷 — "금액 12,300원 / 사용처 OOO / 거래시간 06/02 14:57 / 카드 하나1938"
+  var f={};
+  lines.forEach(function(L){
+    var m=L.match(/^(금액|이용금액|승인금액|카드|회원명|거래구분|거래시간|승인일시|이용일시|사용처|가맹점|가맹점명)\s*[:：]?\s*(.+)$/);
+    if(m) f[m[1]]=m[2].trim();
+  });
+  var amtRaw=f['금액']||f['이용금액']||f['승인금액'];
+  var merch=f['사용처']||f['가맹점']||f['가맹점명'];
+  if(amtRaw || merch){
+    var amount=onlyNum(((amtRaw||'').match(/([\d,]{2,})/)||[])[1]||'');
+    var card=cardLabel(f['카드']||'');
+    var d=parseDateTime(f['거래시간']||f['승인일시']||f['이용일시']||'');
+    var memo=(merch||'').replace(/\(.*?\)/g,'').trim();
+    return {date:d.date,time:d.time,amount:amount,memo:memo,card:card||'하나카드',type:type};
+  }
+
+  // (2) [Web발신] 자유형 폴백
+  var cards=['하나','신한','삼성','현대','국민','KB','롯데','우리','BC','비씨','농협','NH','카카오','씨티','토스'];
+  var card2=''; for(var i=0;i<cards.length;i++){ if(text.indexOf(cards[i])>=0){card2=cards[i];break;} }
+  if(card2){ card2=card2.replace('KB','국민').replace('NH','농협').replace('비씨','BC')+'카드'; }
+  var amount2='';
   for(var li=0;li<lines.length;li++){
     if(/누적|잔여|잔액|한도|가용|포인트/.test(lines[li])) continue;
-    var am=lines[li].match(/([\d,]{2,})\s*원/); if(am){ amount=onlyNum(am[1]); break; }
+    var am=lines[li].match(/([\d,]{2,})\s*원/); if(am){ amount2=onlyNum(am[1]); break; }
   }
-  if(!amount){ var am2=text.replace(/누적[^\d]*[\d,]+원/g,'').match(/([\d,]{3,})\s*원/); if(am2) amount=onlyNum(am2[1]); }
-  var date='', full=text.match(/(20\d{2})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
-  if(full){ date=full[1]+'-'+pad(full[2])+'-'+pad(full[3]); }
-  else{ var md=text.match(/(?:^|[^\d])(\d{1,2})[.\/](\d{1,2})(?![\d])/); if(md){ date=new Date().getFullYear()+'-'+pad(md[1])+'-'+pad(md[2]); } }
-  if(!date) date=todayStr();
-  var memo='', cand=[];
+  if(!amount2){ var am2=text.replace(/누적[^\d]*[\d,]+원/g,'').match(/([\d,]{3,})\s*원/); if(am2) amount2=onlyNum(am2[1]); }
+  var d2=parseDateTime(text);
+  var memo2='', cand=[];
   for(var k=0;k<lines.length;k++){
     var L=lines[k];
     if(/원|누적|잔여|잔액|한도|승인|취소|일시불|할부|Web발신|web발신|\[.*\]/.test(L)) continue;
@@ -391,9 +417,25 @@ function parseCardSms(raw){
     if(cards.some(function(c){return L.indexOf(c)>=0;})&&L.length<8) continue;
     cand.push(L);
   }
-  if(cand.length){ cand.sort(function(a,b){return b.length-a.length;}); memo=cand[0].replace(/\(.*?\)/g,'').trim(); }
-  var inst=text.match(/(\d+)\s*개월/); if(inst&&memo) memo+=' ('+inst[1]+'개월)';
-  return {date:date,amount:amount,memo:memo,card:card||'하나카드',type:type};
+  if(cand.length){ cand.sort(function(a,b){return b.length-a.length;}); memo2=cand[0].replace(/\(.*?\)/g,'').trim(); }
+  return {date:d2.date,time:d2.time,amount:amount2,memo:memo2,card:card2||'하나카드',type:type};
+}
+
+function cardLabel(v){
+  if(!v) return '';
+  var bank=((v.match(/[가-힣A-Za-z]+/)||[''])[0]).replace(/카드$/,'');
+  var last=(v.match(/(\d{3,4})/)||[])[1];
+  if(!bank) return '';
+  return bank+'카드'+(last?'('+last+')':'');
+}
+function parseDateTime(s){
+  s=String(s||''); var date='', time='';
+  var full=s.match(/(20\d{2})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+  if(full){ date=full[1]+'-'+pad(full[2])+'-'+pad(full[3]); }
+  else{ var md=s.match(/(?:^|[^\d])(\d{1,2})[.\/](\d{1,2})(?![\d])/); if(md){ date=new Date().getFullYear()+'-'+pad(md[1])+'-'+pad(md[2]); } }
+  if(!date) date=todayStr();
+  var tm=s.match(/(\d{1,2}):(\d{2})/); if(tm) time=pad(tm[1])+':'+tm[2];
+  return {date:date,time:time};
 }
 
 /* ===== 저장 / 수정 / 삭제 ===== */
@@ -402,7 +444,7 @@ function saveEntry(){
   if(!amount){ toast('금액을 입력하세요'); return; }
   var entry={ date:document.getElementById('fDate').value, amount:amount,
     memo:document.getElementById('fMemo').value.trim(), card:document.getElementById('fCard').value.trim(),
-    type:document.getElementById('fType').value, inLimit:curInLimit, source:lastSource };
+    type:document.getElementById('fType').value, inLimit:curInLimit, time:curTime, source:lastSource };
   var isEdit=!!editingId, id=editingId;
   busy('저장 중…');
   var p=isEdit?api('update',{id:id,entry:entry}):api('add',{entry:entry});
