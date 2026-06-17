@@ -14,7 +14,9 @@
 <meta name="apple-mobile-web-app-title" content="법인카드">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://script.google.com">
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css" rel="stylesheet">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2">
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css"></noscript>
 <style>
   @font-face{font-family:'SUIT Variable';font-weight:100 900;font-display:swap;
     src:url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2') format('woff2-variations');}
@@ -200,8 +202,8 @@
   <!-- 설정 미완료 안내 -->
   <div id="setup" class="setup" style="display:none">
     <b>설정이 필요합니다</b><br>
-    <code>index.html</code> 상단의 <code>GAS_URL</code> 값에 Apps Script <b>웹 앱 URL</b>을 넣어 주세요.
-    (자세한 내용은 <code>배포방법.md</code> 참고)
+    Vercel 환경변수(<code>SHEET_ID</code> 등)와 배포를 완료해 주세요.
+    (자세한 내용은 <code>Vercel-시트API-설정.md</code> 참고)
   </div>
 </div>
 
@@ -209,8 +211,8 @@
 
 <script>
 /* ===== 설정 ===== */
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbzmKOMLpc_TOtzwA8X-Vwf_IwsmcQuJmFDz1Xvws2KvJnHPJxrpj09X9zI4Njrs-hpkUQ/exec';   // ← Apps Script 웹 앱 URL (.../exec)
-var TOKEN   = 'db5897887e5c87e2d919468a03031285fe396f9f7c07f0cd';  // Code.gs 의 TOKEN 과 동일
+var API_URL = '/api/sheet';   // 같은 도메인의 Vercel 서버리스 함수
+var TOKEN   = 'db5897887e5c87e2d919468a03031285fe396f9f7c07f0cd';  // 서버 환경변수 API_TOKEN 과 동일
 
 /* ===== 상태 ===== */
 var curYm = ymOf(new Date());
@@ -230,9 +232,9 @@ function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&am
 /* ===== API (fetch → GAS) ===== */
 function api(action, payload){
   var body = Object.assign({ token:TOKEN, action:action }, payload||{});
-  return fetch(GAS_URL, {
-    method:'POST', redirect:'follow',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
+  return fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
     body: JSON.stringify(body)
   }).then(function(r){ return r.json(); }).then(function(j){
     if(j.error) throw new Error(j.error);
@@ -243,10 +245,6 @@ function api(action, payload){
 /* ===== 초기화 ===== */
 window.addEventListener('load', function(){
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
-  if(GAS_URL.indexOf('http')!==0){
-    document.getElementById('setup').style.display='block';
-    return;
-  }
   document.getElementById('app').style.display='block';
   load();
 });

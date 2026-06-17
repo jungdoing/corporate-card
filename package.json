@@ -1,0 +1,7 @@
+{
+  "name": "corporate-card-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "법인카드 관리 PWA + Vercel 시트 API",
+  "engines": { "node": ">=18" }
+}

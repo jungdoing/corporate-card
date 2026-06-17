@@ -1,5 +1,5 @@
 /* 법인카드 관리 - 서비스워커 (앱 셸 오프라인 캐시) */
-var CACHE = 'card-app-v1';
+var CACHE = 'card-app-v2';
 var SHELL = [
   './',
   './index.html',
