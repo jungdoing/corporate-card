@@ -137,6 +137,19 @@ async function setLimit(ym, limit) {
   return getMonth(ym);
 }
 
+async function unsetLimit(ym) {
+  await ensureSettings();
+  const ids = await sheetIds();
+  let sv = []; try { sv = await getValues(SETTINGS + '!A2:B100000'); } catch (e) {}
+  for (let i = 0; i < sv.length; i++) {
+    if (normYm(sv[i][0]) === ym) {
+      await batch([{ deleteDimension: { range: { sheetId: ids[SETTINGS], dimension: 'ROWS', startIndex: i + 1, endIndex: i + 2 } } }]);
+      break;
+    }
+  }
+  return getMonth(ym);
+}
+
 async function addEntry(e) {
   const t = await entriesTable(), m = t.map;
   const date = normDate(e.date) || ymdNow();
@@ -232,6 +245,7 @@ module.exports = async (req, res) => {
     switch (body.action) {
       case 'getMonth': data = await getMonth(body.ym); break;
       case 'setLimit': data = await setLimit(body.ym, body.limit); break;
+      case 'unsetLimit': data = await unsetLimit(body.ym); break;
       case 'add': data = await addEntry(body.entry); break;
       case 'update': data = await updateEntry(body.id, body.entry); break;
       case 'delete': data = await deleteEntry(body.id, body.ym); break;

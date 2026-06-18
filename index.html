@@ -195,17 +195,17 @@
   .limit-btns .btn{flex:1;width:auto}
 
   /* 한도 계산 시트 */
-  .calc-line{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
-  .calc-lab{font-size:13px;font-weight:600;color:var(--muted)}
-  .calc-fld{background:#fff;border:0.5px solid var(--field);border-radius:9px;padding:6px 9px;font-size:13px;font-weight:700;color:var(--ink);text-align:center;font-family:inherit;font-variant-numeric:tabular-nums}
+  .calc-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
+  .calc-lab{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .calc-fld{background:#fff;border:0.5px solid var(--field);border-radius:9px;padding:6px 4px;height:31px;font-size:13px;font-weight:700;color:var(--ink);text-align:center;font-family:inherit;font-variant-numeric:tabular-nums}
   .calc-card{background:var(--row);border-radius:14px;padding:12px;margin-top:13px}
-  .calc-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .calc-row{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin-top:9px}
   .calc-row:first-child{margin-top:0}
-  .calc-row .u{font-size:13px;color:var(--ink);font-weight:600}
-  .calc-mul{color:#9A9A9A;font-weight:700}
-  .calc-cal{flex:none;width:30px;height:30px;border:0;border-radius:9px;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+  .calc-row .u{font-size:12px;color:var(--ink);font-weight:600;flex:none}
+  .calc-mul{color:#9A9A9A;font-weight:700;flex:none}
+  .calc-cal{flex:none;width:31px;height:31px;border:0;border-radius:9px;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
   .calc-cal i{font-size:15px}
-  .calc-amt{flex:1;text-align:right;font-size:14px;font-weight:800;color:var(--ink);min-width:60px;font-variant-numeric:tabular-nums}
+  .calc-amt{flex:1;text-align:right;font-size:13px;font-weight:800;color:var(--ink);min-width:0;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .calc-rmv{flex:none;border:0;background:none;color:#BDBDBD;cursor:pointer;padding:2px;display:flex}
   .calc-rmv i{font-size:15px}
   .calc-add{display:block;width:100%;text-align:center;font-size:13px;color:var(--accent-tint-t);font-weight:700;padding:10px;background:#fff;border-radius:10px;margin-top:9px;cursor:pointer;border:0;font-family:inherit}
@@ -416,6 +416,7 @@ function render(data){
   rEl.className='hero num'+(over?' over':'');
 
   document.getElementById('limitV').textContent=hasLimit?won(data.limit):'미설정';
+  if(hasLimit){ try{ localStorage.setItem('cardapp_limit_'+data.ym, String(data.limit)); }catch(e){} }
   var usedVEl=document.getElementById('usedV');
   usedVEl.textContent=won(data.used);
   usedVEl.style.color=over?'var(--warn)':'var(--ink)';
@@ -435,11 +436,11 @@ function render(data){
 
   document.getElementById('limitSetup').style.display=hasLimit?'none':'block';
   document.getElementById('heroBlock').style.display=hasLimit?'block':'none';
-  if(!hasLimit) document.getElementById('limitInput').value='';
+  if(!hasLimit){ var pv=prevMonthLimit(curYm); document.getElementById('limitInput').value=(pv>0)?pv.toLocaleString('ko-KR'):''; }
   updateClear('limitInput');
   var lb=document.getElementById('limitBox');
   lb.classList.toggle('clickable',hasLimit);
-  lb.onclick=hasLimit?openLimitModal:null;
+  lb.onclick=hasLimit?function(){openLimitModal();}:null;
   document.getElementById('limitPencil').style.display=hasLimit?'inline-block':'none';
 
   curEntries=data.entries;
@@ -530,6 +531,7 @@ function askDelete(id){
 function doDelete(id){ closeModal(); busy('삭제 중…'); api('delete',{id:id,ym:curYm}).then(function(d){ toast('삭제됨'); render(d); }).catch(failToast); }
 
 function openLimitModal(prefill){
+  if(typeof prefill!=='number') prefill=null;
   var isSet = !!(curData && curData.limitSet);
   var val = (prefill!=null) ? prefill : (isSet ? curData.limit : '');
   var valStr = (val===''||val==null) ? '' : Number(val).toLocaleString('ko-KR');
@@ -549,9 +551,9 @@ function openLimitModal(prefill){
 }
 function saveLimitModal(){
   var v=onlyNum(document.getElementById('mLimit').value);
-  if(v===''){ toast('한도 금액을 입력하세요'); return; }
-  closeModal(); busy('저장 중…');
-  api('setLimit',{ym:curYm,limit:v}).then(function(d){ toast('한도 저장됨'); render(d); }).catch(failToast);
+  closeModal(); busy(v===''?'변경 중…':'저장 중…');
+  var p=(v==='')?api('unsetLimit',{ym:curYm}):api('setLimit',{ym:curYm,limit:v});
+  p.then(function(d){ toast(v===''?'한도 미설정으로 변경됨':'한도 저장됨'); render(d); }).catch(failToast);
 }
 
 /* ===== 입력 폼 ===== */
@@ -713,9 +715,9 @@ function editEntry(id){
 }
 function saveLimit(){
   var v=onlyNum(document.getElementById('limitInput').value);
-  if(v===''){ toast('한도 금액을 입력하세요'); return; }
-  busy('저장 중…');
-  api('setLimit',{ym:curYm,limit:v}).then(function(d){ toast('한도 저장됨'); render(d); }).catch(failToast);
+  busy(v===''?'변경 중…':'저장 중…');
+  var p=(v==='')?api('unsetLimit',{ym:curYm}):api('setLimit',{ym:curYm,limit:v});
+  p.then(function(d){ toast(v===''?'한도 미설정으로 변경됨':'한도 저장됨'); render(d); }).catch(failToast);
 }
 
 /* ===== 입력 지우기(×) ===== */
@@ -726,10 +728,11 @@ function clearInput(id){ var i=document.getElementById(id); if(!i) return; i.val
 /* ===== 한도 계산기 ===== */
 var calcTarget='inline', calcBase=50000, calcTotalDays=30, calcRows=[];
 function daysInMonth(ym){ var p=ym.split('-'); return new Date(Number(p[0]), Number(p[1]), 0).getDate(); }
+function prevMonthLimit(ym){ var p=ym.split('-'); var pym=ymOf(new Date(Number(p[0]),Number(p[1])-2,1)); var v=0; try{ v=Number(localStorage.getItem('cardapp_limit_'+pym))||0; }catch(e){} return v; }
 function loadCalcDefaults(){
   var d=null; try{ d=JSON.parse(localStorage.getItem('cardapp_calc')); }catch(e){}
   calcBase=(d&&d.base)?Number(d.base):50000;
-  calcRows=(d&&d.rows&&d.rows.length)? d.rows.map(function(r){ return {people:Number(r.people)||1, days:Number(r.days)||calcTotalDays}; }) : [{people:1, days:calcTotalDays}];
+  calcRows=(d&&d.rows&&d.rows.length)? d.rows.map(function(r){ return {people:Number(r.people)||1, days:Number(r.days)||calcTotalDays, start:r.start||null, end:r.end||null}; }) : [{people:1, days:calcTotalDays}];
 }
 function saveCalcDefaults(){ try{ localStorage.setItem('cardapp_calc', JSON.stringify({base:calcBase, rows:calcRows})); }catch(e){} }
 function calcAmount(r){ if(!calcTotalDays) return 0; return Math.round(calcBase*(Number(r.days)||0)/calcTotalDays*(Number(r.people)||0)); }
@@ -739,9 +742,9 @@ function renderCalc(){
   var rows='';
   calcRows.forEach(function(r,i){
     rows+='<div class="calc-row">'
-      +'<input class="calc-fld" style="width:42px" inputmode="numeric" value="'+(r.people||'')+'" oninput="calcSet('+i+',\'people\',this.value)"><span class="u">명</span>'
+      +'<input class="calc-fld" style="width:40px" inputmode="numeric" value="'+(r.people||'')+'" oninput="calcSet('+i+',\'people\',this.value)"><span class="u">명</span>'
       +'<span class="calc-mul">×</span>'
-      +'<input class="calc-fld" id="calcDays'+i+'" style="width:42px" inputmode="numeric" value="'+(r.days||'')+'" oninput="calcSet('+i+',\'days\',this.value)"><span class="u">일</span>'
+      +'<input class="calc-fld" id="calcDays'+i+'" style="width:40px" inputmode="numeric" value="'+(r.days||'')+'" oninput="calcSet('+i+',\'days\',this.value)"><span class="u">일</span>'
       +'<button class="calc-cal" onclick="openRangeCal('+i+')" aria-label="기간 선택"><i class="ti ti-calendar"></i></button>'
       +'<span class="calc-amt" id="calcAmt'+i+'">'+won(calcAmount(r))+'</span>'
       +(calcRows.length>1?'<button class="calc-rmv" onclick="calcRemove('+i+')"><i class="ti ti-x"></i></button>':'<span style="width:19px"></span>')
@@ -774,7 +777,7 @@ function applyCalc(){
 
 /* ===== 기간 선택 캘린더 ===== */
 var calStart=null, calEnd=null, calRow=-1;
-function openRangeCal(rowIdx){ calRow=rowIdx; calStart=null; calEnd=null; renderCal(); }
+function openRangeCal(rowIdx){ calRow=rowIdx; var r=calcRows[rowIdx]; if(r&&r.start&&r.end){ calStart=r.start; calEnd=r.end; } else { calStart=null; calEnd=null; } renderCal(); }
 function renderCal(){
   var p=curYm.split('-'), y=Number(p[0]), mo=Number(p[1]);
   var first=new Date(y,mo-1,1).getDay(), dim=daysInMonth(curYm), cells='';
@@ -806,7 +809,7 @@ function calPick(d){
 function calApply(){
   if(calStart===null || calEnd===null){ toast('기간(시작·종료일)을 선택하세요'); return; }
   var lo=Math.min(calStart,calEnd), hi=Math.max(calStart,calEnd);
-  if(calRow>=0 && calcRows[calRow]) calcRows[calRow].days=hi-lo+1;
+  if(calRow>=0 && calcRows[calRow]){ calcRows[calRow].days=hi-lo+1; calcRows[calRow].start=lo; calcRows[calRow].end=hi; }
   renderCalc();
 }
 
