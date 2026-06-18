@@ -121,9 +121,9 @@ async function getMonth(ym) {
   let used = 0, extra = 0;
   entries.forEach(x => { const v = (x.type === '취소' ? -1 : 1) * x.amount; if (x.inLimit === '제외') extra += v; else used += v; });
   let sv = []; try { sv = await getValues(SETTINGS + '!A2:B100000'); } catch (e) {}
-  let limit = 0;
-  for (const row of sv) { if (normYm(row[0]) === ym) { limit = Number(row[1]) || 0; break; } }
-  return { ym, limit, used, extra, remaining: limit - used, entries };
+  let limit = 0, limitSet = false;
+  for (const row of sv) { if (normYm(row[0]) === ym) { limit = Number(row[1]) || 0; limitSet = true; break; } }
+  return { ym, limit, limitSet, used, extra, remaining: limit - used, entries };
 }
 
 async function setLimit(ym, limit) {
