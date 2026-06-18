@@ -34,9 +34,14 @@
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
   .wrap{max-width:480px;margin:0 auto;padding:18px 14px 56px}
-  .apptitle{display:flex;align-items:center;gap:9px;padding:4px 2px 16px}
-  .apptitle i{font-size:24px;color:var(--blush)}
-  .apptitle span{font-size:20px;font-weight:500;color:#fff}
+  .apptitle{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 2px 16px}
+  .apptitle .l{display:flex;align-items:center;gap:9px;min-width:0}
+  .apptitle .l i{font-size:24px;color:var(--blush)}
+  .apptitle .l span{font-size:20px;font-weight:500;color:#fff}
+  .this-month{flex:none;display:inline-flex;align-items:center;gap:5px;background:var(--blush);color:var(--navy);
+    border:0;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer}
+  .this-month i{font-size:15px}
+  .this-month:active{opacity:.85}
 
   .card{border-radius:20px;padding:20px 22px;margin-bottom:14px}
   .card.white{background:var(--white);color:var(--navy)}
@@ -160,7 +165,10 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="apptitle"><i class="ti ti-credit-card"></i><span>법인카드 관리</span></div>
+  <div class="apptitle">
+    <div class="l"><i class="ti ti-credit-card"></i><span>법인카드 관리</span></div>
+    <button class="this-month" id="thisMonthBtn" onclick="goThisMonth()" style="display:none"><i class="ti ti-calendar-event"></i> 이번 달</button>
+  </div>
 
   <div id="app" style="display:none">
     <!-- 요약 -->
@@ -253,7 +261,7 @@ var API_URL = '/api/sheet';
 var TOKEN   = 'db5897887e5c87e2d919468a03031285fe396f9f7c07f0cd';
 
 /* ===== 상태 ===== */
-var curYm = ymOf(new Date());
+var curYm = (function(){ try{ return localStorage.getItem('cardapp_lastYm') || ymOf(new Date()); }catch(e){ return ymOf(new Date()); } })();
 var curEntries = [];
 var curData = null;
 var editingId = null;
@@ -294,11 +302,13 @@ function load(){
   });
 }
 function moveMonth(d){ var p=curYm.split('-'); curYm=ymOf(new Date(Number(p[0]),Number(p[1])-1+d,1)); load(); }
+function goThisMonth(){ curYm=ymOf(new Date()); load(); }
 
 /* ===== 렌더 ===== */
 function render(data){
   curYm=data.ym; curData=data;
-  try{ localStorage.setItem('cardapp_'+data.ym, JSON.stringify(data)); }catch(e){}
+  try{ localStorage.setItem('cardapp_'+data.ym, JSON.stringify(data)); localStorage.setItem('cardapp_lastYm', data.ym); }catch(e){}
+  document.getElementById('thisMonthBtn').style.display=(data.ym===ymOf(new Date()))?'none':'inline-flex';
   var p=curYm.split('-');
   document.getElementById('ymLabel').textContent=p[0]+'년 '+Number(p[1])+'월';
 
