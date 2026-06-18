@@ -166,7 +166,7 @@
   .sheet-q{font-size:14px;font-weight:500;color:var(--ink);line-height:1.55}
   .sheet-memo{font-size:12px;font-weight:500;color:var(--muted);margin-top:6px}
   .sheet-detail{font-size:12px;font-weight:500;color:var(--muted);margin-top:8px;line-height:1.7}
-  .sheet input{margin-top:8px}
+  .sheet input{margin:0}
   .sheet-btns{display:flex;gap:8px;margin-top:18px}
   .sheet-btn{flex:1;text-align:center;border:0;background:var(--row);color:var(--ink);font-size:14px;font-weight:800;
     padding:14px;border-radius:12px;cursor:pointer;font-family:inherit;
@@ -224,6 +224,10 @@
   .cal-cell.rng{background:var(--accent-tint);color:var(--accent-deep)}
   .cal-cell.edge{background:var(--accent);color:var(--accent-deep);font-weight:800}
   .cal-sel{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:11px 13px;background:var(--row);border-radius:12px}
+  .datefield{width:100%;border:0.5px solid var(--field);border-radius:12px;padding:11px 13px;height:42px;
+    font-size:14px;font-weight:500;color:var(--ink);background:var(--card);font-family:inherit;
+    display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-variant-numeric:tabular-nums}
+  .datefield i{font-size:16px;color:var(--muted)}
 
   #toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(16px);
     background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;
@@ -306,7 +310,7 @@
           <button class="form-close" onclick="cancelEntry()" aria-label="닫기"><i class="ti ti-x"></i></button>
         </div>
         <div class="grid2">
-          <div><label class="fl">날짜</label><input type="date" id="fDate"></div>
+          <div><label class="fl">날짜</label><button type="button" class="datefield" id="fDateBtn" onclick="openDatePicker()"><span id="fDateText">날짜 선택</span><i class="ti ti-calendar"></i></button><input type="hidden" id="fDate"></div>
           <div><label class="fl">금액 (원)</label><input type="text" id="fAmount" class="num-in" inputmode="numeric" placeholder="0"></div>
         </div>
         <label class="fl">가맹점 <span style="color:var(--accent-tint-t)">*</span></label>
@@ -566,6 +570,7 @@ function toggleManual(){
 }
 function showForm(v){
   document.getElementById('fDate').value=v.date||todayStr();
+  setDateText();
   document.getElementById('fAmount').value=v.amount?Number(v.amount).toLocaleString('ko-KR'):'';
   document.getElementById('fMemo').value=v.memo||'';
   document.getElementById('fNote').value=v.note||'';
@@ -732,9 +737,17 @@ function prevMonthLimit(ym){ var p=ym.split('-'); var pym=ymOf(new Date(Number(p
 function loadCalcDefaults(){
   var d=null; try{ d=JSON.parse(localStorage.getItem('cardapp_calc')); }catch(e){}
   calcBase=(d&&d.base)?Number(d.base):50000;
-  calcRows=(d&&d.rows&&d.rows.length)? d.rows.map(function(r){ return {people:Number(r.people)||1, days:Number(r.days)||calcTotalDays, start:r.start||null, end:r.end||null}; }) : [{people:1, days:calcTotalDays}];
+  var savedTD=(d&&d.totalDays)?Number(d.totalDays):0;
+  calcRows=(d&&d.rows&&d.rows.length)? d.rows.map(function(r){
+    var days=Number(r.days)||calcTotalDays;
+    if(savedTD && days===savedTD) days=calcTotalDays;
+    else if(days>calcTotalDays) days=calcTotalDays;
+    var st=r.start||null, en=r.end||null;
+    if(en && en>calcTotalDays){ st=null; en=null; }
+    return {people:Number(r.people)||1, days:days, start:st, end:en};
+  }) : [{people:1, days:calcTotalDays}];
 }
-function saveCalcDefaults(){ try{ localStorage.setItem('cardapp_calc', JSON.stringify({base:calcBase, rows:calcRows})); }catch(e){} }
+function saveCalcDefaults(){ try{ localStorage.setItem('cardapp_calc', JSON.stringify({base:calcBase, totalDays:calcTotalDays, rows:calcRows})); }catch(e){} }
 function calcAmount(r){ if(!calcTotalDays) return 0; return Math.round(calcBase*(Number(r.days)||0)/calcTotalDays*(Number(r.people)||0)); }
 function calcTotal(){ var s=0; calcRows.forEach(function(r){ s+=calcAmount(r); }); return s; }
 function openCalc(target){ calcTarget=target||'inline'; calcTotalDays=daysInMonth(curYm); loadCalcDefaults(); renderCalc(); }
@@ -762,7 +775,16 @@ function renderCalc(){
   );
 }
 function calcSetBase(v){ calcBase=Number(onlyNum(v))||0; updateCalcAmounts(); }
-function calcSet(i,k,v){ if(calcRows[i]){ calcRows[i][k]=Number(onlyNum(v))||0; updateCalcAmounts(); } }
+function calcSet(i,k,v){
+  if(!calcRows[i]) return;
+  var n=Number(onlyNum(v))||0;
+  if(k==='days'){
+    if(n>calcTotalDays){ n=calcTotalDays; var el=document.getElementById('calcDays'+i); if(el) el.value=n; }
+    calcRows[i].start=null; calcRows[i].end=null;
+  }
+  calcRows[i][k]=n;
+  updateCalcAmounts();
+}
 function updateCalcAmounts(){
   calcRows.forEach(function(r,i){ var el=document.getElementById('calcAmt'+i); if(el) el.textContent=won(calcAmount(r)); });
   var t=document.getElementById('calcTotal'); if(t) t.textContent=won(calcTotal());
@@ -812,6 +834,32 @@ function calApply(){
   if(calRow>=0 && calcRows[calRow]){ calcRows[calRow].days=hi-lo+1; calcRows[calRow].start=lo; calcRows[calRow].end=hi; }
   renderCalc();
 }
+
+/* ===== 날짜 선택 (입력폼, 단일 날짜) ===== */
+var dpYm=null, dpSel=null;
+function setDateText(){ var d=document.getElementById('fDate').value, p=(d||'').split('-');
+  document.getElementById('fDateText').textContent = (p.length===3) ? (p[0]+'. '+p[1]+'. '+p[2]) : '날짜 선택'; }
+function openDatePicker(){ dpSel=document.getElementById('fDate').value || todayStr(); dpYm=dpSel.substring(0,7); renderDatePicker(); }
+function dpNav(d){ var p=dpYm.split('-'); dpYm=ymOf(new Date(Number(p[0]),Number(p[1])-1+d,1)); renderDatePicker(); }
+function renderDatePicker(){
+  var p=dpYm.split('-'), y=Number(p[0]), mo=Number(p[1]);
+  var first=new Date(y,mo-1,1).getDay(), dim=daysInMonth(dpYm), cells='';
+  ['일','월','화','수','목','금','토'].forEach(function(w,idx){ cells+='<div class="cal-wd"'+(idx===0?' style="color:var(--danger)"':'')+'>'+w+'</div>'; });
+  for(var b=0;b<first;b++) cells+='<div class="cal-cell empty"></div>';
+  var selDay=(dpSel && dpSel.substring(0,7)===dpYm)?Number(dpSel.split('-')[2]):0;
+  var today=todayStr();
+  for(var d=1;d<=dim;d++){
+    var ds=dpYm+'-'+pad(d), cls='cal-cell'+(d===selDay?' edge':'');
+    var dot=(ds===today && d!==selDay)?'<span class="mp-dot"></span>':'';
+    cells+='<div class="'+cls+'" style="position:relative" onclick="dpPick('+d+')">'+d+dot+'</div>';
+  }
+  openSheet(
+    '<div class="sheet-hd"><div class="sheet-title">날짜 선택</div>'+xBtn()+'</div>'
+    +'<div class="mp-year"><button class="mp-nav" onclick="dpNav(-1)"><i class="ti ti-chevron-left"></i></button><span class="mp-y">'+y+'년 '+mo+'월</span><button class="mp-nav" onclick="dpNav(1)"><i class="ti ti-chevron-right"></i></button></div>'
+    +'<div class="cal-grid">'+cells+'</div>'
+  );
+}
+function dpPick(d){ var p=dpYm.split('-'); document.getElementById('fDate').value=p[0]+'-'+p[1]+'-'+pad(d); setDateText(); closeModal(); }
 
 /* ===== 토스트 ===== */
 var toastT;
