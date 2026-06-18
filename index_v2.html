@@ -57,14 +57,14 @@
   .lhint{font-size:12px;color:var(--muted);margin-top:8px}
 
   .hero-row{display:flex;align-items:flex-end;gap:4px;margin:4px 0 8px}
-  .mascot{flex:none;height:106px;width:auto}
+  .mascot{flex:none;height:120px;width:auto}
   .hero-r{flex:1;text-align:right;padding-bottom:6px;min-width:0}
   .lab{font-size:14px;font-weight:600;color:var(--muted)}
   .hero{font-size:36px;font-weight:900;color:var(--ink);letter-spacing:.01em;line-height:1.05;margin-top:2px;white-space:nowrap}
   .hero.neg{color:var(--danger)}
   /* 한도 미설정 프롬프트 (cat02) */
   .limit-prompt{display:flex;align-items:center;gap:12px;margin:2px 0 12px}
-  .limit-prompt .cat-sm{flex:none;width:66px;height:auto}
+  .limit-prompt .cat-sm{flex:none;width:86px;height:auto}
   .lp-title{font-size:15px;font-weight:800;color:var(--ink)}
   .lp-desc{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
   /* 문자 카드 (cat03) */
@@ -149,19 +149,25 @@
   .sheet{background:#fff;color:var(--ink);width:100%;max-width:480px;border-radius:22px 22px 0 0;
     padding:8px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(26px);transition:transform .25s}
   .modal-bg.show .sheet{transform:translateY(0)}
-  .sheet-grip{width:38px;height:4px;background:#E2E2E2;border-radius:999px;margin:8px auto 14px}
-  .sheet-h{margin:0 2px 12px}
+  .sheet-grip{width:38px;height:4px;background:#E2E2E2;border-radius:999px;margin:8px auto 4px}
+  .sheet-hd{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .sheet-title{font-size:16px;font-weight:800;color:var(--ink)}
-  .sheet-sub{font-size:13px;font-weight:500;color:var(--muted);margin-top:3px}
-  .sheet-note{font-size:13px;font-weight:500;color:var(--ink);background:var(--row);border-radius:12px;padding:11px 13px;margin:6px 0;line-height:1.5}
-  .sheet-btn{width:100%;border:0;background:var(--row);color:var(--ink);font-size:15px;font-weight:600;
-    padding:14px;border-radius:13px;cursor:pointer;font-family:inherit;margin-top:8px;
-    display:flex;align-items:center;justify-content:center;gap:7px}
-  .sheet-btn i{font-size:18px}
-  .sheet-btn.primary{background:var(--ink);color:#fff;font-weight:800}
-  .sheet-btn.danger{background:#FBEAEA;color:var(--danger)}
-  .sheet-btn.ghost{background:transparent;color:var(--muted)}
-  .sheet input{margin-top:4px}
+  .sheet-x{flex:none;width:30px;height:30px;border:0;border-radius:9px;background:#F2F2F2;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+  .sheet-x i{font-size:17px}
+  .sheet-bd{margin-top:18px}
+  .sheet-info{font-size:13px;font-weight:500;color:var(--ink);line-height:1.7}
+  .sheet-q{font-size:14px;font-weight:500;color:var(--ink);line-height:1.55}
+  .sheet-memo{font-size:12px;font-weight:500;color:var(--muted);margin-top:6px}
+  .sheet-detail{font-size:12px;font-weight:500;color:var(--muted);margin-top:8px;line-height:1.7}
+  .sheet input{margin-top:8px}
+  .sheet-btns{display:flex;gap:8px;margin-top:18px}
+  .sheet-btn{flex:1;text-align:center;border:0;background:var(--row);color:var(--ink);font-size:14px;font-weight:800;
+    padding:14px;border-radius:12px;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;gap:6px}
+  .sheet-btn i{font-size:17px}
+  .sheet-btn.pri{background:var(--ink);color:#fff}
+  .sheet-btn.dng{background:#FBEAEA;color:var(--danger)}
 
   #toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(16px);
     background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;
@@ -227,7 +233,7 @@
       <div class="sms-top">
         <div class="sms-left">
           <div class="flabel"><i class="ti ti-clipboard-text"></i>카드 문자 붙여넣기</div>
-          <textarea id="smsText" placeholder="카드 승인 문자를 붙여넣으세요.&#10;금액·거래시간·사용처 자동 인식"></textarea>
+          <textarea id="smsText" placeholder="카드 승인 문자를 붙여넣으세요. 금액·거래시간·사용처를 자동 인식해요."></textarea>
         </div>
         <img class="cat-sms" src="cat03.png" alt="">
       </div>
@@ -384,27 +390,36 @@ function render(data){
 /* ===== 모달 ===== */
 function openSheet(html){ document.getElementById('modalSheet').innerHTML=html; document.getElementById('modalBg').classList.add('show'); }
 function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+function xBtn(){ return '<button class="sheet-x" onclick="closeModal()" aria-label="닫기"><i class="ti ti-x"></i></button>'; }
+function fmtDateTime(date,time){ var d=(date||'').split('-'); var s=d[0]+'. '+d[1]+'. '+d[2]; if(time) s+=' '+time; return s; }
 
 function rowMenu(id){
   var e=findEntry(id); if(!e) return;
-  var dd=e.date.split('-');
-  var sub=dd[1]+'/'+dd[2]+(e.time?' '+e.time:'')+(e.card?' · '+e.card:'');
+  var lines=[fmtDateTime(e.date,e.time)];
+  if(e.card) lines.push(esc(e.card));
+  lines.push(won(e.amount));
   openSheet(
-    '<div class="sheet-h"><div class="sheet-title">'+esc(e.memo||'(가맹점 없음)')+'</div>'
-    +'<div class="sheet-sub">'+esc(sub)+' · '+won(e.amount)+'</div></div>'
-    +(e.note?'<div class="sheet-note">메모 · '+esc(e.note)+'</div>':'')
-    +'<button class="sheet-btn" onclick="closeModal();editEntry(\''+id+'\')"><i class="ti ti-pencil"></i> 수정</button>'
-    +'<button class="sheet-btn danger" onclick="askDelete(\''+id+'\')"><i class="ti ti-trash"></i> 삭제</button>'
-    +'<button class="sheet-btn ghost" onclick="closeModal()">닫기</button>'
+    '<div class="sheet-hd"><div class="sheet-title">'+esc(e.memo||'(가맹점 없음)')+'</div>'+xBtn()+'</div>'
+    +'<div class="sheet-bd"><div class="sheet-info">'+lines.join('<br>')+'</div>'
+    +(e.note?'<div class="sheet-memo">'+esc(e.note)+'</div>':'')+'</div>'
+    +'<div class="sheet-btns">'
+    +'<button class="sheet-btn dng" onclick="askDelete(\''+id+'\')"><i class="ti ti-trash"></i> 삭제</button>'
+    +'<button class="sheet-btn pri" onclick="closeModal();editEntry(\''+id+'\')"><i class="ti ti-pencil"></i> 수정</button>'
+    +'</div>'
   );
 }
 function askDelete(id){
   var e=findEntry(id); if(!e) return;
+  var lines=[fmtDateTime(e.date,e.time), esc(e.memo||'(가맹점 없음)')];
+  if(e.card) lines.push(esc(e.card));
+  lines.push(won(e.amount));
   openSheet(
-    '<div class="sheet-h"><div class="sheet-title">내역을 삭제할까요?</div>'
-    +'<div class="sheet-sub">'+esc(e.memo||'(가맹점 없음)')+' · '+won(e.amount)+'</div></div>'
-    +'<button class="sheet-btn danger" onclick="doDelete(\''+id+'\')"><i class="ti ti-trash"></i> 삭제</button>'
-    +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
+    '<div class="sheet-hd"><div class="sheet-title">내역을 삭제할까요?</div>'+xBtn()+'</div>'
+    +'<div class="sheet-bd"><div class="sheet-info">'+lines.join('<br>')+'</div></div>'
+    +'<div class="sheet-btns">'
+    +'<button class="sheet-btn" onclick="closeModal()">취소</button>'
+    +'<button class="sheet-btn dng" onclick="doDelete(\''+id+'\')">삭제</button>'
+    +'</div>'
   );
 }
 function doDelete(id){ closeModal(); busy('삭제 중…'); api('delete',{id:id,ym:curYm}).then(function(d){ toast('삭제됨'); render(d); }).catch(failToast); }
@@ -412,11 +427,10 @@ function doDelete(id){ closeModal(); busy('삭제 중…'); api('delete',{id:id,
 function openLimitModal(){
   var cur = curData? curData.limit : 0;
   openSheet(
-    '<div class="sheet-h"><div class="sheet-title">월 한도 '+(cur?'수정':'설정')+'</div>'
-    +'<div class="sheet-sub">'+curYmLabel()+'</div></div>'
-    +'<input type="text" id="mLimit" class="num-in" inputmode="numeric" placeholder="한도 금액 (원)" value="'+(cur?cur.toLocaleString('ko-KR'):'')+'">'
-    +'<button class="sheet-btn primary" onclick="saveLimitModal()">저장</button>'
-    +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
+    '<div class="sheet-hd"><div class="sheet-title">월 한도 '+(cur?'수정':'설정')+'</div>'+xBtn()+'</div>'
+    +'<div class="sheet-bd"><div class="sheet-info">'+curYmLabel()+'</div>'
+    +'<input type="text" id="mLimit" class="num-in" inputmode="numeric" placeholder="한도 금액 (원)" value="'+(cur?cur.toLocaleString('ko-KR'):'')+'"></div>'
+    +'<div class="sheet-btns"><button class="sheet-btn pri" onclick="saveLimitModal()"><i class="ti ti-check"></i> 저장</button></div>'
   );
   var mi=document.getElementById('mLimit');
   mi.addEventListener('input',function(){ var n=onlyNum(this.value); this.value=n?Number(n).toLocaleString('ko-KR'):''; });
@@ -548,15 +562,17 @@ function saveEntry(){
     });
     if(dup){
       pending=entry;
-      var dd=(entry.date||'').split('-');
-      var dstr=dd[0]+'. '+dd[1]+'. '+dd[2];
-      var amtStr=(Number(amount)||0).toLocaleString('ko-KR')+'원';
+      var dlines=[fmtDateTime(entry.date,entry.time), esc(entry.memo||'(가맹점 없음)')];
+      if(entry.card) dlines.push(esc(entry.card));
+      dlines.push((Number(amount)||0).toLocaleString('ko-KR')+'원');
       openSheet(
-        '<div class="sheet-h"><div class="sheet-title">동일한 내역이 있어요</div></div>'
-        +'<div style="font-size:14px;color:var(--ink);line-height:1.55;margin:0 2px 12px">같은 날짜·가맹점·금액 내역이 이미 있습니다.<br>그래도 저장할까요?</div>'
-        +'<div class="sheet-note num">'+dstr+' · <b style="font-weight:800">'+esc(entry.memo||'(가맹점 없음)')+'</b> · <b style="font-weight:800">'+amtStr+'</b></div>'
-        +'<button class="sheet-btn primary" onclick="confirmSave()"><i class="ti ti-check"></i> 네, 저장</button>'
-        +'<button class="sheet-btn ghost" onclick="closeModal()">취소</button>'
+        '<div class="sheet-hd"><div class="sheet-title">동일한 내역이 있어요</div>'+xBtn()+'</div>'
+        +'<div class="sheet-bd"><div class="sheet-q">같은 날짜·가맹점·금액 내역이 이미 있습니다.<br>그래도 저장할까요?</div>'
+        +'<div class="sheet-detail">'+dlines.join('<br>')+'</div></div>'
+        +'<div class="sheet-btns">'
+        +'<button class="sheet-btn" onclick="closeModal()">취소</button>'
+        +'<button class="sheet-btn pri" onclick="confirmSave()"><i class="ti ti-check"></i> 저장</button>'
+        +'</div>'
       );
       return;
     }
