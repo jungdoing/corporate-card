@@ -581,6 +581,7 @@ function toggleManual(){
   resetEdit(); setEntryHeader('직접 입력','',false);
   showForm({date:todayStr(),card:'하나카드'}); lastSource='수동';
   document.getElementById('manualLink').style.display='none';
+  document.getElementById('entryForm').scrollIntoView({behavior:'smooth',block:'center'});
 }
 function showForm(v){
   document.getElementById('fDate').value=v.date||todayStr();
@@ -618,7 +619,8 @@ function analyzeSms(){
   document.getElementById('manualLink').style.display='none';
   setEntryHeader('문자에서 추출','확인 후 저장하세요.', !pr.amount);
   showForm(pr);
-  if(!pr.amount) document.getElementById('fAmount').focus();
+  if(!pr.amount) document.getElementById('fAmount').focus({preventScroll:true});
+  document.getElementById('entryForm').scrollIntoView({behavior:'smooth',block:'center'});
 }
 function parseCardSms(raw){
   var text=raw.replace(/\r/g,'');
